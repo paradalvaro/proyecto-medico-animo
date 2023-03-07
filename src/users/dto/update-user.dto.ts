@@ -15,7 +15,7 @@ import {
   IsObject,
 } from 'class-validator';
 import { importantPhone } from '../interfaces/importantPhones.interface';
-import { Recipes } from '../interfaces/recipe.interface';
+import { CompleteForm } from '../interfaces/recipe.interface';
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
   @IsString()
@@ -87,5 +87,5 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
 
   @IsObject()
   @IsOptional()
-  recipes?: Recipes;
+  completeForm?: CompleteForm;
 }

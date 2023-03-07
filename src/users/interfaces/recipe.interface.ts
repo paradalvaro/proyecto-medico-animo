@@ -1,23 +1,31 @@
+export interface CompleteForm {
+  recipes?: Recipes;
+  dream?: DataYear<number>;
+  mania_irritable?: DataYear<boolean>;
+  mania?: DataYear<string>;
+  depresion?: DataYear<string>;
+  cambios_animo?: DataYear<number>;
+  peso?: DataYear<string>;
+  menstruacion?: DataYear<boolean>;
+}
 export interface Recipes {
   [id: string]: Recipe;
 }
-
 export interface Recipe {
   nameMed: string;
   dosis: string;
   cant: number;
   isActive: boolean;
-  dataYear?: dataYear;
+  dataYear?: DataYear<number>;
 }
 
-export interface dataYear {
-  [year: number]: dataMonth;
+export interface DataYear<T> {
+  [year: number]: DataMonth<T>;
 }
 
-export interface dataMonth {
-  [month: number]: dataDays;
+export interface DataMonth<T> {
+  [month: number]: DataDays<T>;
 }
-
-export interface dataDays {
-  [day: number]: number;
+export interface DataDays<T> {
+  [day: number]: T;
 }

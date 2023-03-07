@@ -6,7 +6,7 @@ import {
   Entity,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Recipe } from '../interfaces/recipe.interface';
+import { CompleteForm } from '../interfaces/recipe.interface';
 
 @Entity()
 export class User {
@@ -52,8 +52,8 @@ export class User {
   @Column('text', { array: true, nullable: true })
   importantPhones: importantPhone[];
 
-  @Column('json', { nullable: true })
-  recipes: Recipe;
+  @Column('json', { default: {}, nullable: true })
+  completeForm: CompleteForm;
 
   @BeforeInsert()
   checkFieldsBeforeInsert() {

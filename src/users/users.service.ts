@@ -13,6 +13,8 @@ import { User } from './entities/user.entity';
 import { phoneType } from './interfaces/phoneType.interface';
 import { v4 as uuid } from 'uuid';
 import { isUUID } from 'class-validator';
+import { Recipes } from './interfaces/recipe.interface';
+import { DataYear } from './interfaces/recipe.interface';
 
 @Injectable()
 export class UsersService {
@@ -51,7 +53,9 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
-    const { importantPhones, recipes, ...restOfUpdateUserDto } = updateUserDto;
+    //const { importantPhones, recipes, ...restOfUpdateUserDto } = updateUserDto;
+    const { importantPhones, completeForm, ...restOfUpdateUserDto } =
+      updateUserDto;
     if (importantPhones) {
       const check = importantPhones.some((phone) => {
         //const aux = JSON.parse(phone.toString());
@@ -65,27 +69,40 @@ export class UsersService {
     const user = await this.userRepository.preload({
       id,
       importantPhones,
-      recipes,
       ...restOfUpdateUserDto,
     });
 
     if (!user) throw new NotFoundException(`User with id: ${id} not found`);
-    /*if (recipes) {
-      //TODO
-      const keysRecipes = Object.keys(recipes);
-      const jsonUserRecipes = JSON.parse(String(user.recipes));
-      keysRecipes.forEach((keyRecipe) => {
-        if (!isUUID(keyRecipe)) {
-          jsonUserRecipes[uuid()] = recipes[keyRecipe];
-        } else {
-          jsonUserRecipes[keyRecipe];
-        }
-        //actualizar
-        //user.recipes.id => recipes.id
-      });
-    }
-    throw new NotFoundException(`User with id: ${id} not found`);*/
-    // Create query runner
+
+    const keysForm = Object.keys(completeForm || {});
+    //user.completeForm = user.completeForm || {};
+    keysForm.forEach((keyForm) => {
+      //if (completeForm[keyForm] == 'recipes') {
+      if (keyForm == 'recipes') {
+        const recipes = completeForm[keyForm];
+        const keysRecipes = Object.keys(recipes);
+        const userRecipes: Recipes = user.completeForm.recipes || {};
+        //(user.completeForm && user.completeForm.recipes) || {};
+        keysRecipes.forEach((keyRecipe) => {
+          if (!isUUID(keyRecipe)) {
+            userRecipes[uuid()] = recipes[keyRecipe];
+          } else {
+            this.#updateCompleteFormDataYear(
+              userRecipes[keyRecipe].dataYear,
+              recipes[keyRecipe].dataYear,
+            );
+          }
+        });
+        user.completeForm.recipes = userRecipes;
+      } else {
+        user.completeForm[keyForm] = user.completeForm[keyForm] || {};
+        this.#updateCompleteFormDataYear(
+          user.completeForm[keyForm],
+          completeForm[keyForm],
+        );
+      }
+    });
+
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -115,5 +132,37 @@ export class UsersService {
     throw new InternalServerErrorException(
       'Unexpected error, check server logs',
     );
+  }
+
+  //#updateRecipe(userRecipeToUpdate: Recipe, recipeUpdate: Recipe) {
+  #updateCompleteFormDataYear(
+    dataYearToUpdate: DataYear<any>,
+    dataYearUpdate: DataYear<any>,
+  ) {
+    /*  console.log(userRecipeToUpdate);
+    const { dataYear: dataYearToUpdate, ..._ } = userRecipeToUpdate;
+    const { dataYear: dataYearUpdate, ...__ } = recipeUpdate;
+    */
+    //update other fields
+
+    //update dataYear
+    const years = Object.keys(dataYearUpdate);
+    years.forEach((year) => {
+      if (!dataYearToUpdate[year]) {
+        dataYearToUpdate[year] = dataYearUpdate[year];
+        return;
+      }
+      const months = Object.keys(dataYearUpdate[year]);
+      months.forEach((month) => {
+        if (!dataYearToUpdate[year][month]) {
+          dataYearToUpdate[year][month] = dataYearUpdate[year][month];
+          return;
+        }
+        const days = Object.keys(dataYearUpdate[year][month]);
+        days.forEach((day) => {
+          dataYearToUpdate[year][month][day] = dataYearUpdate[year][month][day];
+        });
+      });
+    });
   }
 }

@@ -53,7 +53,6 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
-    //const { importantPhones, recipes, ...restOfUpdateUserDto } = updateUserDto;
     const { importantPhones, completeForm, ...restOfUpdateUserDto } =
       updateUserDto;
     if (importantPhones) {
@@ -65,7 +64,6 @@ export class UsersService {
         throw new BadRequestException('Type Phone not valid');
       }
     }
-    //const user = await this.userRepository.preload({ id, ...updateUserDto });
     const user = await this.userRepository.preload({
       id,
       importantPhones,
@@ -75,14 +73,11 @@ export class UsersService {
     if (!user) throw new NotFoundException(`User with id: ${id} not found`);
 
     const keysForm = Object.keys(completeForm || {});
-    //user.completeForm = user.completeForm || {};
     keysForm.forEach((keyForm) => {
-      //if (completeForm[keyForm] == 'recipes') {
       if (keyForm == 'recipes') {
         const recipes = completeForm[keyForm];
         const keysRecipes = Object.keys(recipes);
         const userRecipes: Recipes = user.completeForm.recipes || {};
-        //(user.completeForm && user.completeForm.recipes) || {};
         keysRecipes.forEach((keyRecipe) => {
           if (!isUUID(keyRecipe)) {
             userRecipes[uuid()] = recipes[keyRecipe];
@@ -134,18 +129,10 @@ export class UsersService {
     );
   }
 
-  //#updateRecipe(userRecipeToUpdate: Recipe, recipeUpdate: Recipe) {
   #updateCompleteFormDataYear(
     dataYearToUpdate: DataYear<any>,
     dataYearUpdate: DataYear<any>,
   ) {
-    /*  console.log(userRecipeToUpdate);
-    const { dataYear: dataYearToUpdate, ..._ } = userRecipeToUpdate;
-    const { dataYear: dataYearUpdate, ...__ } = recipeUpdate;
-    */
-    //update other fields
-
-    //update dataYear
     const years = Object.keys(dataYearUpdate);
     years.forEach((year) => {
       if (!dataYearToUpdate[year]) {

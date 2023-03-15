@@ -39,7 +39,10 @@ export class AuthService {
     const { password: _, ...restOfUser } = user;
     return {
       ...restOfUser,
-      token: this.#getJwtToken({ id: user.id }),
+      token: this.#getJwtToken({
+        id: user.id,
+        name: user.name,
+      }),
     };
   }
 

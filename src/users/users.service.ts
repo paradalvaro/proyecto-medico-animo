@@ -16,11 +16,14 @@ import { isUUID } from 'class-validator';
 import { Recipes } from './interfaces/recipe.interface';
 import { DataYear } from './interfaces/recipe.interface';
 
+import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
+import { JwtService } from '@nestjs/jwt';
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly dataSource: DataSource,
+    private readonly jwtService: JwtService,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -38,7 +41,13 @@ export class UsersService {
       await this.userRepository.save(user);
       delete user.password;
 
-      return user;
+      return {
+        ...user,
+        token: this.#getJwtToken({
+          id: user.id,
+          name: user.name,
+        }),
+      };
     } catch (error) {
       this.#handleDBExceptions(error);
     }
@@ -151,5 +160,10 @@ export class UsersService {
         });
       });
     });
+  }
+
+  #getJwtToken(payload: JwtPayload): string {
+    const token = this.jwtService.sign(payload);
+    return token;
   }
 }
